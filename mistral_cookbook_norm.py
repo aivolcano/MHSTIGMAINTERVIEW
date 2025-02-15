@@ -1,10 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 06/02/25 21:52
-# @Author  : Chen Yancan
-# @File    : zero-shot-llama.py
-# @Email   : yancan@u.nus.edu / yancan@comp.nus.edu.sg
-# @Software : PyCharm
+
 
 import json
 import time
@@ -14,12 +8,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 import pandas as pd
 from tqdm import tqdm
 
-#############################################
-# 模型加载（请根据实际情况修改 MODEL_NAME）
-#############################################
-
-# 请将此处的 MODEL_NAME 替换为你的LLama3.1-8B模型路径或名称
-#MODEL_NAME = "/hpctmp/e1143641/IdentifyingSchizophreniaStigma/llm_weights/meta-llama/Meta-Llama-3.1-8B-Instruct"  # 例如："decapoda-research/llama-7b-hf"（这里只是示例，请替换成实际的8B模型）
+# Input your MODEL_NAME here
+#MODEL_NAME = "/hpctmp/e1143641/IdentifyingSchizophreniaStigma/llm_weights/meta-llama/Meta-Llama-3.1-8B-Instruct"  
 #MODEL_NAME = "/hpctmp/e1143641/IdentifyingSchizophreniaStigma/llm_weights/meta-llama/Meta-Llama-3.1-70B-Instruct"
 #MODEL_NAME = "/hpctmp/e1143641/IdentifyingSchizophreniaStigma/llm_weights/mistralai/Mistral-Nemo-Instruct-2407" # 20GB
 MODEL_NAME = "/hpctmp/e1143641/IdentifyingSchizophreniaStigma/llm_weights/mistralai/Mixtral-8x7B-Instruct-v0.1"
@@ -35,17 +25,13 @@ tokenizer.padding_side='left'
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
     trust_remote_code=True,
-    attn_implementation="flash_attention_2",  # 启用 Flash Attention 2
-    device_map="auto",  # 或者直接 .to(device)
-    torch_dtype=torch.bfloat16,  # H100一般建议使用fp16
+    attn_implementation="flash_attention_2", 
+    device_map="auto",  
+    torch_dtype=torch.bfloat16, 
 )
 
 model.eval()
 
-
-#############################################
-# 工具函数
-#############################################
 
 def parse_pred(pred_text):
     """
@@ -69,10 +55,7 @@ def parse_pred(pred_text):
 
 
 def format_conversation(conversations):
-    """
-    将对话列表转换为指定的文本格式。
-    例如，将每条消息转换为 "角色: 内容" 的格式。
-    """
+    
     formatted_text = ""
     for msg in conversations:
         formatted_text += f"{msg['role'].lower()}: {msg['content']}\n"
@@ -80,10 +63,7 @@ def format_conversation(conversations):
 
 
 def build_prompt(conversation_text):
-    """
-    根据对话文本构造推理提示词，使用固定的vignette和任务说明，
-    并将 [Conversations] 占位符替换为实际对话内容。
-    """
+ 
     system_prompt = f"""
 You will be given a vignette and an interview snippet. Your role is a competent annotator for social stigma toward mental illness. The [conversation] is based on the [vignette]'s plot.
 
@@ -265,28 +245,23 @@ Format your outputs as JSON objects:
    "label": "<choose one letter from [A/B/C/D/E/F/G/H]>",
 }}
 """
-    # 将占位符替换为实际对话文本
 #    prompt = system_prompt.replace("[Conversations]", conversation_text)
     return system_prompt
 
 
 def call_llama_api_batch(prompts, generation_kwargs):
-    """
-    对一个 prompt 列表进行批量推理，返回模型生成的文本列表。
-    """
-    # 将每个 prompt 转换为聊天消息格式
+ 
+
     messages_batch = [
         [{"role": "user", "content": prompt}] for prompt in prompts
     ]
 
-    # 应用聊天模板，将消息批处理为模型输入格式
     formatted_prompts = tokenizer.apply_chat_template(
         messages_batch,
         tokenize=False,
         add_generation_prompt=True
     )
 #    print(formatted_prompts)
-    # 对格式化后的 prompts 进行 tokenization，添加填充和截断
     inputs = tokenizer(
         formatted_prompts,
         return_tensors="pt",
@@ -294,14 +269,12 @@ def call_llama_api_batch(prompts, generation_kwargs):
         truncation=False
     ).to(device)
 
-    # 禁用梯度计算，加快生成速度
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
             **generation_kwargs
         )
 
-    # 解码模型输出，跳过特殊标记
     responses = tokenizer.batch_decode(outputs, skip_special_tokens=False)
     return responses
 
@@ -309,9 +282,7 @@ def call_llama_api_batch(prompts, generation_kwargs):
 
 
 def load_jsonl_file(file_path):
-    """
-    加载 JSONL 文件，每行一个 JSON 对象，返回数据列表。
-    """
+ 
     data_list = []
     with open(file_path, 'r', encoding='utf-8') as file:
         for line in file:
@@ -319,19 +290,8 @@ def load_jsonl_file(file_path):
     return data_list
 
 
-#############################################
-# 数据处理与批量推理主函数
-#############################################
-
 def process_dataset(input_jsonl, output_jsonl, batch_size=8):
-    """
-    处理数据集，采用 batch 推理方式进行标注预测，并实时将结果写入输出文件。
-
-    Args:
-        input_jsonl: 输入的 JSONL 文件路径
-        output_jsonl: 输出的 JSONL 文件路径
-        batch_size: 每个推理 batch 的大小
-    """
+ 
     data_list = load_jsonl_file(input_jsonl)
     processed_texts = set()
 
@@ -340,16 +300,15 @@ def process_dataset(input_jsonl, output_jsonl, batch_size=8):
         "max_new_tokens": 4096,
         "temperature": 0.3,
         "eos_token_id":tokenizer.eos_token_id,
-        "do_sample": False,  # 可根据需要设为 False 固定采样
+        "do_sample": False,  
         "top_p": 0.95,
         "top_k":50,
         
     }
 
     prompt_batch = []
-    row_batch = []  # 存储对应的原始行数据
+    row_batch = []  
 
-    # 打开输出文件（追加写入模式）
     with open(output_jsonl, 'a', encoding='utf-8') as outf:
         # 使用 tqdm 显示进度
         for row in tqdm(data_list, desc="Processing rows"):
@@ -357,14 +316,11 @@ def process_dataset(input_jsonl, output_jsonl, batch_size=8):
             if displayed_text in processed_texts:
                 continue
 
-            # 格式化对话内容
             conversation_text = format_conversation(row['conversations'])
-            # 构造 prompt
             prompt = build_prompt(conversation_text)
             prompt_batch.append(prompt)
             row_batch.append(row)
 
-            # 当达到 batch_size 或最后一条时，调用模型推理
             if len(prompt_batch) >= batch_size:
                 responses = call_llama_api_batch(prompt_batch, generation_kwargs)
                 for resp, orig_row in zip(responses, row_batch):
@@ -386,12 +342,10 @@ def process_dataset(input_jsonl, output_jsonl, batch_size=8):
                     outf.write(json.dumps(result, ensure_ascii=False) + "\n")
                     processed_texts.add(orig_row.get('displayed_text'))
 
-                # 清空 batch 列表
                 prompt_batch = []
                 row_batch = []
 
 
-        # 处理剩余不足 batch_size 的数据
         if prompt_batch:
             responses = call_llama_api_batch(prompt_batch, generation_kwargs)
             for resp, orig_row in zip(responses, row_batch):
@@ -406,40 +360,29 @@ def process_dataset(input_jsonl, output_jsonl, batch_size=8):
                     'pred_label': pred_label,
 				'responses':resp,
                 }
-#                print('pred_label',pred_label)
-#                print('----')
-#                print(resp)
+
                 outf.write(json.dumps(result, ensure_ascii=False) + "\n")
                 processed_texts.add(orig_row.get('displayed_text'))
 
 
 def jsonl_to_csv(jsonl_file_path, csv_file_path):
-    """
-    将 JSONL 文件转换为 CSV 文件。
-    """
+
     data = []
     with open(jsonl_file_path, 'r', encoding='utf-8') as f:
         for line in f:
             data.append(json.loads(line))
     df = pd.DataFrame(data)
     df.to_csv(csv_file_path, index=False)
-    print(f"数据已成功转换为 CSV 文件：{csv_file_path}")
 
 
-#############################################
-# 主函数入口
-#############################################
 
 if __name__ == '__main__':
-    # 输入与输出文件路径（请根据需要调整路径）
     INPUT_JSONL = './dataset/test.jsonl'
 #    OUTPUT_JSONL = './results/cookbook_mistral_norm.jsonl'
     OUTPUT_JSONL = './results/cookbook_mixtral_8x7b.jsonl'
 
-    # 开始处理数据集（batch_size可根据GPU显存调节）
     process_dataset(INPUT_JSONL, OUTPUT_JSONL, batch_size=2) #norm=32
 
-    # 如有需要，可调用 jsonl_to_csv 将结果转换为 CSV 文件
 #    OUTPUT_CSV = './results/cookbook_mistral_norm.csv'
     OUTPUT_CSV = './results/cookbook_mixtral_8x7b.csv'
     jsonl_to_csv(OUTPUT_JSONL, OUTPUT_CSV)

@@ -1,10 +1,4 @@
 
-# -*- coding: utf-8 -*-
-# @Time    : 2025/2/9 下午10:00
-# @Author  : Yancan Chen
-# @Email   : yancan@u.nus.edu
-# @File    : roberta.py
-
 import json  
 import torch
 import torch.nn as nn
@@ -20,7 +14,6 @@ from sklearn.metrics import f1_score, recall_score, precision_score, accuracy_sc
 from collections import Counter
 import logging
 
-# 配置日志记录器
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('social_stigma')
 
@@ -35,7 +28,6 @@ def seed_everything(seed=42):
 
 seed_everything(42)
 
-# 加载 train.csv 和 test.csv
 train_df = pd.read_csv('./dataset/train.csv')
 test_df = pd.read_csv('./dataset/test.csv')
 train_dataset = Dataset.from_pandas(train_df)
@@ -45,7 +37,6 @@ model_id = 'hf_models/roberta-base'
 tokenizer = RobertaTokenizer.from_pretrained(model_id)
 model = RobertaForSequenceClassification.from_pretrained(model_id, num_labels=8)
 
-# 更新模型的标签映射，确保只使用8个类别
 label_dict = {'Non-stigmatized': 0,
               'Stigmatized (responsibility)': 1,
               'Stigmatized (social distance)': 2,
@@ -61,9 +52,7 @@ model.config.label2id = label_dict
 
 def encoder_text(examples):
     texts = []
-    # examples["conversations"] 是一个列表，每个元素为该样本的对话列表（对话列表内每个元素为字典，包含 role 和 content）
     for conv in examples["conversations"]:
-        # 使用列表解析，对每条对话信息进行拼接
         conv = ast.literal_eval(conv)
         conversation_text = " ".join([f"{msg['role']}: {msg['content']}" for msg in conv])
         texts.append(conversation_text)
@@ -74,13 +63,12 @@ def encoder_label(examples):
     examples['label'] = label_dict[examples['label']]
     return examples
 
-# 对训练集和测试集进行编码
 train_dataset = train_dataset.map(encoder_text, batched=True)
 train_dataset = train_dataset.map(encoder_label)
 test_dataset = test_dataset.map(encoder_text, batched=True)
 test_dataset = test_dataset.map(encoder_label)
 
-device = "cuda:0"  # if torch.cuda.is_available() else "cpu"
+device = "cuda:0"  
 
 def classification_metrics(y_true, y_pred, labels):
     classification_scores = {}
@@ -184,14 +172,10 @@ model.save_pretrained('./model_directory/{}'.format(model_id))
 
 ### prediction
 predictions = trainer.predict(test_dataset)
-# 使用更新后的 id2label 进行预测，确保只包含8个类别
 predicted_labels = [model.config.id2label[pred] for pred in predictions.predictions.argmax(axis=1)]
-# 从数据集中获取真实标签（数字形式）
 true_labels = test_dataset['label']
-# 将真实标签转换为字符串形式
 true_labels_str = [model.config.id2label[label] for label in true_labels]
 
-# 计算分类报告，确保两边都是字符串
 classification_rep = classification_report(true_labels_str, predicted_labels, target_names=list(label_dict.keys()))
 cohen_kappa_val = cohen_kappa_score(true_labels_str, predicted_labels)
 
@@ -201,11 +185,8 @@ print('classification_metrics------------------',
       classification_metrics(y_true=true_labels, y_pred=[label_dict[label] for label in predicted_labels], labels=label_dict.values()))
    
 
-# 输出部分：从测试集获取文本数据（此处依然使用 displayed_text，如有需要可改为 conversations 拼接后的文本）
 def conversation_to_text(conv_str):
-    """
-    将 conversations 字段（字符串形式）转换为拼接后的文本。
-    """
+   
     try:
         conv = ast.literal_eval(conv_str)
         return " ".join([f"{msg['role']}: {msg['content']}" for msg in conv])
@@ -213,10 +194,8 @@ def conversation_to_text(conv_str):
         logger.error("Error parsing conversation: %s", e)
         return ""
 
-# 针对测试集中的每个样本，从 conversations 字段生成文本
 test_texts = [conversation_to_text(example["conversations"]) for example in test_dataset]
 
-# 构造输出字典，注意：true_labels_str 与 predicted_labels 均为字符串形式
 output_data = {
     'text': test_texts,
     'ground_truth': true_labels_str,

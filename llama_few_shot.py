@@ -168,9 +168,7 @@ Format your outputs as the correct JSON objects, AND Ensure that your response O
 
 
 def call_llama_api_batch(prompts, generation_kwargs):
-    """
-    对一个 prompt 列表进行批量推理，返回模型生成的文本列表。
-    """
+ 
     messages_batch = [
         [{"role": "user", "content": prompt}] for prompt in prompts
     ]

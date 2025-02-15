@@ -85,26 +85,22 @@ Format your outputs as JSON objects:
    "label": "<choose one letter from [A/B/C/D/E/F/G/H]>",
 }}
 """
-    # 将占位符替换为实际对话文本
 #    prompt = system_prompt.replace("[Conversations]", conversation_text)
     return system_prompt
 
 
 def call_llama_api_batch(prompts, generation_kwargs):
     
-    # 将每个 prompt 转换为聊天消息格式
     messages_batch = [
         [{"role": "user", "content": prompt}] for prompt in prompts
     ]
 
-    # 应用聊天模板，将消息批处理为模型输入格式
     formatted_prompts = tokenizer.apply_chat_template(
         messages_batch,
         tokenize=False,
         add_generation_prompt=True
     )
 #    print(formatted_prompts)
-    # 对格式化后的 prompts 进行 tokenization，添加填充和截断
     inputs = tokenizer(
         formatted_prompts,
         return_tensors="pt",
@@ -112,14 +108,12 @@ def call_llama_api_batch(prompts, generation_kwargs):
         truncation=False
     )
 
-    # 禁用梯度计算，加快生成速度
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
             **generation_kwargs
         )
 
-    # 解码模型输出，跳过特殊标记
     responses = tokenizer.batch_decode(outputs, skip_special_tokens=False)
     return responses
 

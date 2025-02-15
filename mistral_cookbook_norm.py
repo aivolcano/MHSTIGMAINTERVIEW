@@ -14,11 +14,9 @@ from tqdm import tqdm
 #MODEL_NAME = "/hpctmp/e1143641/IdentifyingSchizophreniaStigma/llm_weights/mistralai/Mistral-Nemo-Instruct-2407" # 20GB
 MODEL_NAME = "/hpctmp/e1143641/IdentifyingSchizophreniaStigma/llm_weights/mistralai/Mixtral-8x7B-Instruct-v0.1"
 
-# 指定使用 GPU（假设你的 GPU 是H100 80GB）
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(device)
 
-# 加载tokenizer和模型
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 tokenizer.pad_token_id = tokenizer.eos_token_id
 tokenizer.padding_side='left'
@@ -34,9 +32,7 @@ model.eval()
 
 
 def parse_pred(pred_text):
-    """
-    尝试解析模型输出中的 JSON 对象，返回 label。
-    """
+    
 #    pred_text=pred_text.split('<|start_header_id|>assistant<|end_header_id|>')[-1]
     pred_text=pred_text.split('[/INST]')[-1]
     json_match = re.search(r'\{[\s\S]*\}', pred_text)

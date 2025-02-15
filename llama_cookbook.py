@@ -32,9 +32,7 @@ model.eval()
 
 
 def parse_pred(pred_text):
-    """
-    尝试解析模型输出中的 JSON 对象，返回 label。
-    """
+    
     pred_text=pred_text.split('<|start_header_id|>assistant<|end_header_id|>')[-1]
     json_match = re.search(r'\{[\s\S]*\}', pred_text)
     if json_match:
@@ -52,10 +50,7 @@ def parse_pred(pred_text):
 
 
 def format_conversation(conversations):
-    """
-    将对话列表转换为指定的文本格式。
-    例如，将每条消息转换为 "角色: 内容" 的格式。
-    """
+    
     formatted_text = ""
     for msg in conversations:
         formatted_text += f"{msg['role'].lower()}: {msg['content']}\n"
@@ -249,9 +244,7 @@ Format your outputs as the correct JSON objects, AND Ensure that your response O
 
 
 def call_llama_api_batch(prompts, generation_kwargs):
-    """
-    对一个 prompt 列表进行批量推理，返回模型生成的文本列表。
-    """
+    
     messages_batch = [
         [{"role": "user", "content": prompt}] for prompt in prompts
     ]
@@ -282,9 +275,7 @@ def call_llama_api_batch(prompts, generation_kwargs):
 
 
 def load_jsonl_file(file_path):
-    """
-    加载 JSONL 文件，每行一个 JSON 对象，返回数据列表。
-    """
+    
     data_list = []
     with open(file_path, 'r', encoding='utf-8') as file:
         for line in file:
@@ -294,14 +285,7 @@ def load_jsonl_file(file_path):
 
 
 def process_dataset(input_jsonl, output_jsonl, batch_size=8):
-    """
-    Process the dataset using batch mode
-
-    Args:
-        input_jsonl: path to the jsonl file
-        output_jsonl: 输出的 JSONL 文件路径
-        batch_size: 每个推理 batch 的大小
-    """
+    
     data_list = load_jsonl_file(input_jsonl)
     processed_texts = set()
 
@@ -395,4 +379,3 @@ if __name__ == '__main__':
 
     OUTPUT_CSV = './results/cookbook_llama3.3_70b.csv'
     jsonl_to_csv(OUTPUT_JSONL, OUTPUT_CSV)
-    print("处理完成！")

@@ -11,20 +11,15 @@ from tqdm import tqdm
 
 
 def call_openai_api(prompt, max_retries=3):
-    """
-    调用 Together ChatCompletion 接口的封装：
-    - prompt: 输入提示
-    - max_retries: 最大重试次数
-    """
+   
     from together import Together
     import time
 
-    # 初始化 Together 客户端
-    client = Together(api_key='49ce251da9401e8275280c74ec39f2c6d4d0553aebf22e5910be44820f92b069')
+    client = Together(api_key=<type your together api here>)
 
     for attempt in range(max_retries):
         try:
-            time.sleep(2)  # 根据需要设置等待时间
+            time.sleep(2) 
             response = client.chat.completions.create(
                 model="mistralai/Mixtral-8x7B-Instruct-v0.1",
                 messages=[{'role': 'user', 'content': prompt}],
@@ -36,15 +31,14 @@ def call_openai_api(prompt, max_retries=3):
                 stop=["[/INST]", "</s>"],
                 stream=True
             )
-            # 将流式返回的结果拼接成完整的回答
             result = ""
             for token in response:
                 if hasattr(token, 'choices'):
                     result += token.choices[0].delta.content
             return result
         except Exception as e:
-            print(f"调用 Together 接口失败，重试 {attempt+1}/{max_retries} 次。错误信息：{e}")
-    # 如果多次重试依然失败，则返回空字符串或其他标记
+            pass
+            
     return ""
 
 
@@ -53,13 +47,11 @@ def parse_pred(pred):
     Extract JSON from the validator's result field using regex and ensure it matches the expected structure.
     """
     try:
-        # 使用正则表达式提取 JSON 字符串
         match = re.search(r"\{.*\}", pred, re.DOTALL)
         if match:
             json_data = json.loads(match.group(0))  # 尝试解析为 JSON
             return json_data
         else:
-            # 未匹配到任何 JSON，返回默认值
             return {
                 "label": "",
             }
@@ -189,9 +181,7 @@ Format your outputs as JSON objects:
 
 # # 预测
 def format_conversation(conversations):
-    """
-    将对话列表转换为指定的文本格式
-    """
+  
     formatted_text = ""
     # conversations = json.loads(conversations)
     print(type(conversations))
@@ -201,9 +191,7 @@ def format_conversation(conversations):
     return formatted_text.strip()
 
 def load_jsonl_file(file_path):
-    """
-    加载JSONL文件并返回数据列表
-    """
+    
     data_list = []
     with open(file_path, 'r', encoding='utf-8') as file:
         for line in file:
@@ -212,21 +200,12 @@ def load_jsonl_file(file_path):
 
 
 
-# 在 process_dataset 函数中修改相关代码
 def process_dataset(input_csv, output_jsonl):
-    """
-    处理数据集并生成预测结果，采用边处理边写入的方式
-    Args:
-        input_csv: 输入的CSV文件路径
-        output_jsonl: 输出的JSONL文件路径
-    """
-    # 读取输入文件
+    
     # df = pd.read_csv(input_csv)
-    # 加载jsonl 文件
     df = load_jsonl_file(input_csv)
     processed_texts = set()
 
-    # 使用 'a' 模式打开文件，这样可以追加写入
     for row in tqdm(df):
         try:
             # print(row)
@@ -251,7 +230,7 @@ def process_dataset(input_csv, output_jsonl):
                 'pred_label': pred_label,
             }
             
-            # 每处理完一条数据就立即写入文件
+            
             with open(output_jsonl, 'a', encoding='utf-8') as jsonl_file:
                 jsonl_file.write(json.dumps(result, ensure_ascii=False) + '\n')
             
@@ -277,17 +256,14 @@ def jsonl_to_csv(jsonl_file_path, csv_file_path):
 
 
 if __name__ == '__main__':
-    # 设置输入输出路径
     INPUT_CSV = './dataset/test.jsonl'
     OUTPUT_JSONL = './results/few_shot_mixtral_8x7b.jsonl'
     
-     # 执行处理
+     # 
     process_dataset(INPUT_CSV, OUTPUT_JSONL)
     
-    # 转换为CSV
     OUTPUT_CSV = './results/few_shot_mixtral_8x7b.csv'
     jsonl_to_csv(OUTPUT_JSONL, OUTPUT_CSV)
-    print(f"处理完成！结果保存在 {OUTPUT_CSV}")
     
    
 

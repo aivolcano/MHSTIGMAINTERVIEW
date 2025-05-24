@@ -1,7 +1,7 @@
 <div align="center">
 <br>
 <img src="assets/title.png" width="166">
-<h2>MHSTIGMAINTERVIEW</h2></div>
+<h3>MHSTIGMAINTERVIEW</h3></div>
 <h3>What is Stigma Attributed to? A Theory-Grounded, Expert-Annotated Interview Corpus for Demystifying Mental-Health Stigma</h3></div>
 
 <p align="center">

@@ -1,6 +1,7 @@
 The dataset is partinationed into trainset and testset. 
 
-**Label Distribution**
+### Label Distribution
+
 Table: Label distribution in our corpus, including a non-stigmatizing category and seven stigma attributions operationalized from the attribution model.
 | Label                  | # Snippet | %     |
 |------------------------|-----------|-------|

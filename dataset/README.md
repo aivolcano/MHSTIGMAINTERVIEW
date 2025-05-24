@@ -1,4 +1,20 @@
 The dataset is partinationed into trainset and testset. 
+
+Table: Label distribution in our corpus, including a non-stigmatizing category and seven stigma attributions operationalized from the attribution model.
+| Label                  | # Snippet | %     |
+|------------------------|-----------|-------|
+| Non-stigmatizing       | 2,232     | 53.90 |
+| **Stigmatizing**       | -         | -     |
+| &nbsp;&nbsp;Responsibility         | 394       | 9.51  |
+| &nbsp;&nbsp;Social Distance        | 379       | 9.15  |
+| &nbsp;&nbsp;Anger                 | 298       | 7.20  |
+| &nbsp;&nbsp;Helping               | 158       | 3.82  |
+| &nbsp;&nbsp;Pity                  | 42        | 1.01  |
+| &nbsp;&nbsp;Coercive Segregation | 271       | 6.54  |
+| &nbsp;&nbsp;Fear                 | 367       | 8.86  |
+| **Total**              | 4,141     | 100   |
+
+
 ```json
 {
   "participant_id": "p1",

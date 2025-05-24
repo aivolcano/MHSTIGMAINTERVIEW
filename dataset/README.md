@@ -15,6 +15,8 @@ Table: Label distribution in our corpus, including a non-stigmatizing category a
 | **Total**              | 4,141     | 100   |
 
 
+
+### Example
 ```json
 {
   "participant_id": "p1",

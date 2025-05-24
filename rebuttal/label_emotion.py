@@ -8,7 +8,7 @@ import torch
 
 # # 1. Load the jsonl data, one json object per row.
 data = []
-for f_name in ['./mhs_dataset/test.jsonl', './mhs_dataset/train.jsonl']:
+for f_name in ['../dataset/test.jsonl', '../dataset/train.jsonl']:
     with open(f_name, 'r', encoding='utf-8') as f:
         for line in f:
             data.append(json.loads(line))
@@ -32,12 +32,12 @@ def get_emotion(text):
 df['emotion'] = df['displayed_text'].apply(get_emotion)
 
 print(df.head())
-df.to_csv('./mhs_dataset/train_test_with_emotion.csv',index=False)
+df.to_csv('../dataset/train_test_with_emotion.csv',index=False)
 
 
 
 
-# df = pd.read_csv('./mhs_dataset/train_test_with_emotion.csv')
+# df = pd.read_csv('../dataset/train_test_with_emotion.csv')
 
 print('--------/n emotion ------', df['emotion'].unique())
 

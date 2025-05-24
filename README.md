@@ -8,7 +8,7 @@
   <a href="https://huggingface.co/datasets/yancan/MHSTIGMAINTERVIEW/viewer/default/test">
     <img 
         src="https://img.shields.io/badge/MMaDA%20Demo-Hugging%20Face%20Space-blue?logo=huggingface&logoColor=blue" 
-        alt="MMaDA on Hugging Face"
+        alt="MHSTIGMAINTERVIEW"
     />
   </a>
   

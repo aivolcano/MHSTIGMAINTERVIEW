@@ -5,7 +5,7 @@
 <h3>What is Stigma Attributed to? A Theory-Grounded, Expert-Annotated Interview Corpus for Demystifying Mental-Health Stigma</h3></div>
 
 <p align="center">
-  <a href="https://huggingface.co/spaces/Gen-Verse/MMaDA">
+  <a href="https://huggingface.co/datasets/yancan/MHSTIGMAINTERVIEW/viewer/default/test">
     <img 
         src="https://img.shields.io/badge/MMaDA%20Demo-Hugging%20Face%20Space-blue?logo=huggingface&logoColor=blue" 
         alt="MMaDA on Hugging Face"

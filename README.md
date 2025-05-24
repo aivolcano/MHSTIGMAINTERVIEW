@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://huggingface.co/datasets/yancan/MHSTIGMAINTERVIEW/viewer/default/test">
     <img 
-        src="https://img.shields.io/badge/Dataset-Hugging%20Face%20Dataset-blue?logo=huggingface&logoColor=blue" 
+        src="https://img.shields.io/badge/MHSTIGMAINTERVIEW-Hugging%20Face%20Dataset-blue?logo=huggingface&logoColor=blue" 
         alt="MHSTIGMAINTERVIEW"
     />
   </a>

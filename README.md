@@ -32,7 +32,7 @@ Please check under the [dataset folder](./dataset/).
 # install latest version torch 
 
 # Install the packages
-pip install transformers scikit-learn pandas numpy
+pip install transformers scikit-learn pandas numpy statsmodels
 
 # install the flash_attention_2
 pip3 install flash-attn --no-build-isolation
